@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --mtn-yellow: #FFCC00;
+  --mtn-yellow-hover: #F0BE00;
+  --mtn-blue: #003399;
+  --mtn-blue-light: #0044CC;
+  --surface: #FFFFFF;
+  /* Palette chaude et sobre : fond ivoire, contours fins, sidebar sombre */
+  --bg: #FAF9F5;
+  --border: #E5E3DB;
+  --sidebar-bg: #23221E;
+  --sidebar-text: #B8B5AC;
+  --sidebar-active: #2E2D28;
+  --text-primary: #21201C;
+  --text-secondary: #6E6B63;
+  --text-muted: #9C998F;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* PrimeVue overrides */
+.p-toast { z-index: 9999 !important; font-family: 'Montserrat', sans-serif !important; opacity: 1 !important; }
+.p-dialog { font-family: 'Montserrat', sans-serif !important; border-radius: 12px !important; }
+
+/* Notifications style Claude : rectangle blanc, contour fin, accent discret */
+.p-toast .p-toast-message {
+  background: #FFFFFF !important;
+  border: 1px solid var(--border) !important;
+  border-left-width: 3px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(33, 32, 28, 0.10), 0 2px 6px rgba(33, 32, 28, 0.05) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: none !important;
+}
+.p-toast .p-toast-message-content { padding: 13px 15px !important; align-items: flex-start !important; gap: 10px; }
+.p-toast .p-toast-summary { font-weight: 700 !important; font-size: 13px !important; color: var(--text-primary) !important; }
+.p-toast .p-toast-detail { font-size: 12.5px !important; color: var(--text-secondary) !important; margin-top: 2px !important; }
+.p-toast .p-toast-icon-close { color: var(--text-muted) !important; width: 22px !important; height: 22px !important; }
+.p-toast .p-toast-icon-close:hover { background: #F5F4EF !important; }
+.p-toast .p-toast-message-icon { margin-top: 1px; width: 16px !important; height: 16px !important; }
+
+/* Accent par sévérité : juste le liseré gauche et l'icône, pas de fond coloré */
+.p-toast .p-toast-message-success { border-left-color: #21A05A !important; }
+.p-toast .p-toast-message-success .p-toast-message-icon { color: #21A05A !important; }
+.p-toast .p-toast-message-error { border-left-color: #D4452C !important; }
+.p-toast .p-toast-message-error .p-toast-message-icon { color: #D4452C !important; }
+.p-toast .p-toast-message-warn { border-left-color: #FFCC00 !important; }
+.p-toast .p-toast-message-warn .p-toast-message-icon { color: #B7791F !important; }
+.p-toast .p-toast-message-info { border-left-color: #23221E !important; }
+.p-toast .p-toast-message-info .p-toast-message-icon { color: #23221E !important; }
+
+/* Entrée/sortie douces */
+.p-toast-message-enter-from { opacity: 0; transform: translateY(8px) scale(.98); }
+.p-toast-message-enter-active { transition: all .25s cubic-bezier(.21, 1.02, .73, 1); }
+.p-toast-message-leave-to { opacity: 0; transform: translateY(-4px) scale(.98); }
+.p-toast-message-leave-active { transition: all .2s ease; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* Utility classes */
+.card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+/* Cartes : rectangles aux contours fins, sans ombres lourdes */
+.bg-white.rounded-2xl, .bg-white.rounded-xl {
+  border-radius: 12px !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  background: var(--mtn-yellow);
+  color: #1A1D23;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: var(--mtn-yellow-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,204,0,.3); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-secondary {
+  background: white;
+  color: var(--text-primary);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-secondary:hover { border-color: #C4C8D0; background: #FAFAFA; }
+
+.input-base {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  color: var(--text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  width: 100%;
+}
+.input-base:focus { border-color: #FFCC00; box-shadow: 0 0 0 3px rgba(255,204,0,.12); }
+.input-base::placeholder { color: var(--text-muted); }
+
+/* Transitions fluides globales */
+button, a, input, select, .card { transition: all 0.2s cubic-bezier(.4,0,.2,1); }
+
+/* Transition entre pages (router-view) */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.fade-enter-from { opacity: 0; transform: translateY(6px); }
+.fade-leave-to { opacity: 0; }
+
+/* Apparition douce des cartes */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card, .bg-white.rounded-2xl, .bg-white.rounded-xl { animation: rise-in 0.25s ease both; }

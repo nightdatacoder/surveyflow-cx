@@ -1,0 +1,49 @@
+# ===== Secrets (NE JAMAIS COMMITTER) =====
+.env
+*.env
+!*.env.example
+
+# ===== Données clients / fichiers uploadés =====
+backend/media/
+backend/staticfiles/
+cleaned_*.csv
+joined_*.csv
+*.xlsx
+*.xls
+!**/fixtures/*.xlsx
+
+# ===== Python / Django =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+db.sqlite3
+*.log
+
+# ===== Node / Vue =====
+node_modules/
+frontend/dist/
+.vite/
+npm-debug.log*
+
+# ===== OS / IDE =====
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ===== Documents mémoire & fichiers personnels (HORS CODE) =====
+Clean/
+*.pdf
+*.doc
+*.docx
+*.tmp
+~$*
+~WRL*
+# Images/diagrammes en vrac à la racine (pas les assets de l'app)
+/*.png
+
+# Config locale Claude Code (non pertinente pour le dépôt)
+CLAUDE.md
