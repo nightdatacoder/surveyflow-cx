@@ -61,13 +61,9 @@
       <div class="relative w-full max-w-[430px] bg-white rounded-3xl fade-up"
            style="border:1px solid #EAE7DE;box-shadow:0 24px 60px -20px rgba(28,27,24,.18),0 8px 24px -12px rgba(28,27,24,.10);padding:40px 36px">
 
-        <!-- Logo -->
-        <div class="flex items-center gap-2.5 mb-10">
-          <img src="/surveyflow-s.svg" alt="" class="w-10 h-10 flex-shrink-0" />
-          <div>
-            <p class="font-black text-sm leading-none" style="color:#1C1B18;font-family:Montserrat,sans-serif">SurveyFlow CX</p>
-            <p class="text-xs mt-1" style="color:#9C998F">MTN · Customer Experience</p>
-          </div>
+        <!-- Logotype (mobile seulement — le hero porte la marque sur desktop) -->
+        <div class="lg:hidden mb-9">
+          <img src="/logo-2.svg" alt="SurveyFlow CX" class="h-9" />
         </div>
 
         <h2 class="text-2xl font-black mb-2" style="font-family:Montserrat,sans-serif;letter-spacing:-.02em;color:#1C1B18">

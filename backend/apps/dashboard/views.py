@@ -13,20 +13,52 @@ from apps.auth_app.permissions import IsAdminOrManager
 class AgentDashboardView(APIView):
     def get(self, request):
         user = request.user
-        files = ImportedFile.objects.filter(user=user)
-        recent = files.order_by('-created_at')[:5]
+        is_supervisor = user.role in ('ADMIN', 'MANAGER')
+        files = ImportedFile.objects.all() if is_supervisor else ImportedFile.objects.filter(user=user)
+        reports = ProcessingReport.objects.all() if is_supervisor else ProcessingReport.objects.filter(user=user)
+
+        recent = files.order_by('-created_at')[:6]
+
+        # NPS global = moyenne des scores NPS
+        nps_scores = [r.nps_score for r in reports if r.nps_score is not None]
+        nps_global = round(sum(nps_scores) / len(nps_scores), 1) if nps_scores else None
+
+        # Répartition des sentiments (agrégée depuis les métriques NPS)
+        prom = pas = det = 0
+        for r in reports:
+            for m in (r.metrics or {}).get('nps', []):
+                prom += m.get('promoters', 0)
+                pas += m.get('passives', 0)
+                det += m.get('detractors', 0)
+        total_sent = prom + pas + det
+
+        # Tendance : enquêtes ce mois vs mois précédent
+        now = timezone.now()
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        prev_start = (month_start - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        this_month = files.filter(created_at__gte=month_start).count()
+        prev_month = files.filter(created_at__gte=prev_start, created_at__lt=month_start).count()
+        if prev_month > 0:
+            files_trend = round((this_month - prev_month) / prev_month * 100)
+        else:
+            files_trend = (100 if this_month > 0 else 0)
 
         return Response({
             'total_reports': files.count(),
-            'total_rows': sum(f.total_rows for f in files),
+            'total_rows': files.aggregate(t=Sum('total_rows'))['t'] or 0,
+            'joined_count': files.filter(status='JOINED').count(),
+            'users_count': User.objects.count() if is_supervisor else None,
+            'this_month_reports': this_month,
+            'files_trend': files_trend,
+            'nps_global': nps_global,
+            'sentiment': {'promoters': prom, 'passives': pas, 'detractors': det, 'total': total_sent},
+            'satisfaction_pct': round(prom / total_sent * 100, 1) if total_sent else None,
+            'detraction_pct': round(det / total_sent * 100, 1) if total_sent else None,
             'recent_files': [
                 {
-                    'id': f.id,
-                    'name': f.original_filename,
-                    'project': f.project_name,
-                    'status': f.status,
-                    'rows': f.total_rows,
-                    'date': f.created_at,
+                    'id': f.id, 'name': f.original_filename, 'project': f.project_name,
+                    'status': f.status, 'rows': f.total_rows, 'date': f.created_at,
+                    'user': f.user.get_full_name() or f.user.username,
                 }
                 for f in recent
             ],
