@@ -1,7 +1,37 @@
 <template>
   <div>
-    <!-- En-tête -->
-    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-5">
+    <!-- Hero (mobile) -->
+    <div class="lg:hidden rounded-2xl p-5 mb-5 relative overflow-hidden"
+         style="background:linear-gradient(120deg,#1C1B18 0%,#4a3c12 52%,#9c7a10 100%)">
+      <div class="absolute inset-0" aria-hidden="true"
+           style="background-image:url('/mtn-pattern.png');background-size:170%;opacity:.07;filter:invert(1)"></div>
+      <div class="relative flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xl font-black leading-tight text-white" style="font-family:Montserrat,sans-serif;letter-spacing:-.02em">
+            Bonjour,<br/><span style="color:#FFCC00">{{ greetingName }}</span>
+          </p>
+          <p class="text-xs mt-2 leading-snug" style="color:rgba(255,255,255,.82)">Transformez vos enquêtes clients en décisions.</p>
+        </div>
+        <svg width="112" height="100" viewBox="0 0 112 100" class="flex-shrink-0">
+          <rect x="34" y="14" width="58" height="68" rx="8" fill="rgba(255,255,255,.18)" transform="rotate(9 60 48)"/>
+          <g transform="rotate(-6 54 52)">
+            <rect x="22" y="20" width="60" height="70" rx="8" fill="#fff"/>
+            <rect x="30" y="30" width="30" height="5" rx="2.5" fill="#E5E3DB"/>
+            <rect x="30" y="40" width="20" height="5" rx="2.5" fill="#EFEDE6"/>
+            <rect x="30" y="70" width="8" height="12" rx="2" fill="#FFCC00"/>
+            <rect x="42" y="62" width="8" height="20" rx="2" fill="#FFD633"/>
+            <rect x="54" y="54" width="8" height="28" rx="2" fill="#FFCC00"/>
+            <rect x="66" y="66" width="8" height="16" rx="2" fill="#FFE066"/>
+          </g>
+          <circle cx="90" cy="76" r="16" fill="#FFCC00"/>
+          <polyline points="82 80 87 74 91 77 97 70" fill="none" stroke="#1C1B18" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="93 70 97 70 97 74" fill="none" stroke="#1C1B18" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- En-tête (desktop) -->
+    <div class="hidden lg:flex items-end justify-between gap-2 mb-5">
       <div>
         <h1 class="text-2xl font-black" style="color:#21201C;font-family:Montserrat,sans-serif;letter-spacing:-.02em">Tableau de bord</h1>
         <p class="text-sm mt-0.5" style="color:#9C998F">Vue d'ensemble de vos enquêtes et indicateurs clients</p>
@@ -64,8 +94,8 @@
           <div v-else class="space-y-1">
             <router-link v-for="f in stats.recent_files" :key="f.id" :to="`/import/${f.id}/configure`"
               class="flex items-center gap-3 p-2 rounded-lg hover:bg-[#FAF9F5] transition-colors">
-              <div class="w-8 h-9 rounded flex items-center justify-center flex-shrink-0" style="background:#E6F4EA">
-                <i class="pi pi-file-excel text-sm" style="color:#1A8049"></i>
+              <div class="w-8 h-9 rounded flex items-center justify-center flex-shrink-0" :style="`background:${fileIcon(f.name).bg}`">
+                <i :class="`pi ${fileIcon(f.name).icon} text-sm`" :style="`color:${fileIcon(f.name).color}`"></i>
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-xs font-semibold truncate" style="color:#21201C">{{ f.name }}</p>
@@ -150,6 +180,18 @@ const periodLabel = computed(() => {
   const d = new Date()
   return d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 })
+
+const ROLES = { ADMIN: 'Administrateur', MANAGER: 'Manager CX', AGENT: 'Agent CX' }
+const greetingName = computed(() => auth.user?.first_name || ROLES[auth.user?.role] || 'bienvenue')
+
+// Icône selon le type de fichier (Excel vert, PDF rouge, Word bleu…)
+function fileIcon(name) {
+  const ext = (name || '').split('.').pop().toLowerCase()
+  if (['xlsx', 'xls', 'csv'].includes(ext)) return { icon: 'pi-file-excel', bg: '#E6F4EA', color: '#1A8049' }
+  if (ext === 'pdf') return { icon: 'pi-file-pdf', bg: '#FDECEC', color: '#C13C27' }
+  if (['doc', 'docx'].includes(ext)) return { icon: 'pi-file-word', bg: '#E7EEFB', color: '#2B579A' }
+  return { icon: 'pi-file', bg: '#F0EEE7', color: '#6E6B63' }
+}
 
 const sent = computed(() => stats.value.sentiment || { promoters:0, passives:0, detractors:0, total:0 })
 const sentLegend = computed(() => {
