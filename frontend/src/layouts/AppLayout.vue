@@ -1,12 +1,19 @@
 <template>
-  <div class="flex h-screen overflow-hidden" style="background:var(--bg)">
+  <div class="flex h-screen overflow-hidden relative" style="background:var(--bg)">
+    <!-- Overlay mobile -->
+    <transition name="fade">
+      <div v-if="sidebarOpen" @click="sidebarOpen = false"
+           class="fixed inset-0 z-40 lg:hidden" style="background:rgba(0,0,0,.45)"></div>
+    </transition>
     <!-- Sidebar -->
-    <aside class="w-60 flex-shrink-0 flex flex-col py-5" style="background:var(--sidebar-bg)">
+    <aside class="w-64 lg:w-60 flex-shrink-0 flex flex-col py-5 z-50 transition-transform duration-300
+                  fixed inset-y-0 left-0 lg:static lg:translate-x-0"
+           :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+           style="background:var(--sidebar-bg)">
       <!-- Logo -->
       <div class="px-5 mb-8">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0"
-               style="background:#FFCC00;color:#23221E;font-family:Montserrat,sans-serif">SF</div>
+          <img src="/surveyflow-s.svg" alt="" class="w-9 h-9 flex-shrink-0" />
           <div>
             <p class="font-black text-xs tracking-tight leading-none" style="color:#F5F4EF;font-family:Montserrat,sans-serif">SurveyFlow CX</p>
             <p class="mt-0.5" style="font-size:10px;color:var(--sidebar-text)">MTN Customer Experience</p>
@@ -75,17 +82,20 @@
     <!-- Main content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Top bar -->
-      <header class="flex-shrink-0 px-7 py-4 flex items-center justify-between" style="background:var(--bg);border-bottom:1px solid var(--border)">
-        <div>
-          <h1 class="font-black text-base" style="color:var(--text-primary);font-family:Montserrat,sans-serif;letter-spacing:-.02em">{{ pageTitle }}</h1>
+      <header class="flex-shrink-0 px-4 sm:px-7 py-4 flex items-center justify-between gap-3" style="background:var(--bg);border-bottom:1px solid var(--border)">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <button @click="sidebarOpen = true" class="lg:hidden p-1.5 -ml-1 rounded-lg flex-shrink-0" style="color:var(--text-primary)" aria-label="Menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <h1 class="font-black text-base truncate" style="color:var(--text-primary);font-family:Montserrat,sans-serif;letter-spacing:-.02em">{{ pageTitle }}</h1>
         </div>
-        <div class="flex items-center gap-3">
-          <span class="px-2.5 py-1 rounded-lg text-xs font-bold" :style="roleBadgeStyle">{{ roleLabel }}</span>
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <span class="px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap" :style="roleBadgeStyle">{{ roleLabel }}</span>
         </div>
       </header>
 
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto p-7">
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
             <component :is="Component" />
@@ -97,7 +107,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import NavItem from '@/components/NavItem.vue'
@@ -105,6 +115,10 @@ import NavItem from '@/components/NavItem.vue'
 const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+
+// Drawer mobile : fermé par défaut, se ferme au changement de page
+const sidebarOpen = ref(false)
+watch(() => route.path, () => { sidebarOpen.value = false })
 
 const initials = computed(() => {
   const u = auth.user

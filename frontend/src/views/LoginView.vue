@@ -1,98 +1,107 @@
 <template>
-  <div class="min-h-screen flex" style="background:#FAF9F5">
-    <!-- Left panel — branding -->
-    <div class="hidden lg:flex flex-col justify-between w-[420px] flex-shrink-0 p-10"
-         style="background:#23221E">
-      <!-- Logo -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm tracking-tight"
-             style="background:#FFCC00;color:#23221E;font-family:Montserrat,sans-serif">SF</div>
+  <div class="min-h-screen w-full flex" style="background:#FAF9F5">
+
+    <!-- ===== Panneau gauche : hero (desktop) ===== -->
+    <div class="hidden lg:flex flex-col justify-between relative overflow-hidden"
+         style="width:46%;max-width:640px;background:#1C1B18">
+      <!-- Photo -->
+      <img src="/hero.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" style="object-position:center 20%" />
+      <!-- Dégradé charbon pour lisibilité -->
+      <div class="absolute inset-0" aria-hidden="true"
+           style="background:linear-gradient(180deg,rgba(24,23,20,.72) 0%,rgba(24,23,20,.48) 42%,rgba(24,23,20,.97) 100%)"></div>
+      <!-- Pattern MTN en filigrane -->
+      <div class="absolute inset-0" aria-hidden="true"
+           style="background-image:url('/mtn-pattern.png');background-size:130%;background-position:center;opacity:.06;filter:invert(1);mix-blend-mode:screen"></div>
+      <!-- Glow jaune chaud -->
+      <div class="absolute -bottom-28 -left-20 w-[480px] h-[480px] rounded-full" aria-hidden="true"
+           style="background:radial-gradient(circle,rgba(255,204,0,.38) 0%,rgba(255,204,0,0) 66%)"></div>
+
+      <!-- Logo (sans carré) -->
+      <div class="relative flex items-center gap-3 p-10">
+        <img src="/surveyflow-s.svg" alt="SurveyFlow CX" class="w-11 h-11" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))" />
         <div>
-          <p class="text-white font-bold text-sm tracking-tight" style="font-family:Montserrat,sans-serif">SurveyFlow CX</p>
-          <p class="text-xs mt-px" style="color:#9C998F">MTN Customer Experience</p>
+          <p class="text-white font-black text-base tracking-tight leading-none" style="font-family:Montserrat,sans-serif">SurveyFlow CX</p>
+          <p class="text-xs mt-1" style="color:#D6D3CA">MTN · Customer Experience</p>
         </div>
       </div>
 
-      <!-- Center content -->
-      <div>
-        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
-             style="background:rgba(255,204,0,.15)">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <path d="M9 17H5a2 2 0 01-2-2V5a2 2 0 012-2h11a2 2 0 012 2v3" stroke="#FFCC00" stroke-width="2" stroke-linecap="round"/>
-            <path d="M13 13h8m0 0l-3-3m3 3l-3 3" stroke="#FFCC00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <h1 class="text-3xl font-black text-white leading-tight mb-4"
-            style="font-family:Montserrat,sans-serif;letter-spacing:-.02em">
-          Traitez vos<br/>enquêtes en<br/><span style="color:#FFCC00">quelques clics.</span>
-        </h1>
-        <p class="text-sm leading-relaxed" style="color:#B8B5AC">
-          Nettoyage automatique · Jointures intelligentes ·<br/>
-          Historisation · Export prêt pour l'analyse
-        </p>
+      <div class="flex-1"></div>
 
-        <!-- Feature pills -->
-        <div class="flex flex-wrap gap-2 mt-6">
+      <!-- Accroche (en bas, sur la zone sombre) -->
+      <div class="relative px-10 pb-10">
+        <h1 class="font-black text-white leading-[1.08] mb-4"
+            style="font-family:Montserrat,sans-serif;letter-spacing:-.03em;font-size:clamp(1.9rem,3.2vw,2.9rem)">
+          Transformez vos<br/>enquêtes clients en<br/><span style="color:#FFCC00">décisions.</span>
+        </h1>
+        <p class="text-sm leading-relaxed max-w-sm mb-5" style="color:#D6D3CA">
+          Nettoyage automatique, jointures intelligentes et analyse du NPS —
+          sans écrire une ligne de code.
+        </p>
+        <div class="flex flex-wrap gap-2 max-w-md">
           <span v-for="f in features" :key="f"
             class="px-3 py-1.5 rounded-full text-xs font-semibold"
-            style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)">
+            style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(4px)">
             {{ f }}
           </span>
         </div>
       </div>
-
-      <p class="text-xs" style="color:#7A776E">© 2025 MTN Côte d'Ivoire</p>
     </div>
 
-    <!-- Right panel — form -->
-    <div class="flex-1 flex items-center justify-center p-6">
-      <div class="w-full max-w-[400px]">
-        <!-- Mobile logo -->
-        <div class="lg:hidden flex items-center gap-3 mb-8">
-          <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs"
-               style="background:#23221E;color:#FFCC00;font-family:Montserrat,sans-serif">SF</div>
-          <p class="font-bold text-sm" style="color:#21201C;font-family:Montserrat,sans-serif">SurveyFlow CX</p>
+    <!-- ===== Panneau droit : formulaire ===== -->
+    <div class="flex-1 flex items-center justify-center relative px-5 py-8 sm:px-10"
+         style="background:linear-gradient(160deg,#FAF9F5 0%,#F1EFE8 100%)">
+      <!-- Pattern en fond -->
+      <div class="absolute inset-0 pointer-events-none" aria-hidden="true"
+           style="background-image:url('/mtn-pattern.png');background-size:135%;background-position:center;opacity:.11"></div>
+      <!-- Léger halo jaune en haut à droite -->
+      <div class="absolute -top-20 -right-24 w-[380px] h-[380px] rounded-full pointer-events-none" aria-hidden="true"
+           style="background:radial-gradient(circle,rgba(255,204,0,.12) 0%,rgba(255,204,0,0) 70%)"></div>
+
+      <!-- Carte -->
+      <div class="relative w-full max-w-[430px] bg-white rounded-3xl fade-up"
+           style="border:1px solid #EAE7DE;box-shadow:0 24px 60px -20px rgba(28,27,24,.18),0 8px 24px -12px rgba(28,27,24,.10);padding:40px 36px">
+
+        <!-- Logo -->
+        <div class="flex items-center gap-2.5 mb-10">
+          <img src="/surveyflow-s.svg" alt="" class="w-10 h-10 flex-shrink-0" />
+          <div>
+            <p class="font-black text-sm leading-none" style="color:#1C1B18;font-family:Montserrat,sans-serif">SurveyFlow CX</p>
+            <p class="text-xs mt-1" style="color:#9C998F">MTN · Customer Experience</p>
+          </div>
         </div>
 
-        <h2 class="text-2xl font-black mb-1" style="font-family:Montserrat,sans-serif;letter-spacing:-.02em;color:#21201C">
+        <h2 class="text-2xl font-black mb-2" style="font-family:Montserrat,sans-serif;letter-spacing:-.02em;color:#1C1B18">
           Connexion
         </h2>
-        <p class="text-sm mb-8" style="color:#6E6B63">Bienvenue. Entrez vos identifiants pour continuer.</p>
+        <p class="text-sm mb-8" style="color:#6E6B63">Accédez à votre espace de traitement des enquêtes.</p>
 
         <form @submit.prevent="handleLogin" class="space-y-4">
-          <!-- Username -->
+          <!-- Identifiant -->
           <div>
-            <label class="block text-xs font-bold mb-1.5 uppercase tracking-wide" style="color:#6E6B63;font-family:Montserrat,sans-serif">
-              Identifiant
-            </label>
+            <label class="block text-xs font-bold mb-1.5 uppercase tracking-wide" style="color:#6E6B63;font-family:Montserrat,sans-serif">Identifiant</label>
             <div class="relative">
-              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="#9C998F" stroke-width="2" stroke-linecap="round"/>
                 <circle cx="12" cy="7" r="4" stroke="#9C998F" stroke-width="2"/>
               </svg>
-              <input v-model="form.username" type="text" placeholder="votre.identifiant" required
-                class="input-base"
-                style="font-family:Montserrat,sans-serif;padding-left:40px" />
+              <input v-model="form.username" type="text" placeholder="votre.identifiant" required autofocus
+                class="input-base" style="font-family:Montserrat,sans-serif;padding-left:42px;height:48px" />
             </div>
           </div>
 
-          <!-- Password -->
+          <!-- Mot de passe -->
           <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-bold uppercase tracking-wide" style="color:#6E6B63;font-family:Montserrat,sans-serif">
-                Mot de passe
-              </label>
-            </div>
+            <label class="block text-xs font-bold mb-1.5 uppercase tracking-wide" style="color:#6E6B63;font-family:Montserrat,sans-serif">Mot de passe</label>
             <div class="relative">
-              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <rect x="3" y="11" width="18" height="11" rx="2" stroke="#9C998F" stroke-width="2"/>
                 <path d="M7 11V7a5 5 0 0110 0v4" stroke="#9C998F" stroke-width="2" stroke-linecap="round"/>
               </svg>
               <input v-model="form.password" :type="showPwd ? 'text' : 'password'" placeholder="••••••••" required
-                class="input-base" style="font-family:Montserrat,sans-serif;padding-left:40px;padding-right:40px" />
-              <button type="button" @click="showPwd = !showPwd"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                class="input-base" style="font-family:Montserrat,sans-serif;padding-left:42px;padding-right:42px;height:48px" />
+              <button type="button" @click="showPwd = !showPwd" tabindex="-1"
+                class="absolute right-3 top-1/2 -translate-y-1/2 transition-colors" style="color:#9C998F">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
                   <path v-if="!showPwd" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
                   <circle v-if="!showPwd" cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
                   <path v-if="showPwd" d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -101,27 +110,38 @@
             </div>
           </div>
 
-          <!-- Error -->
-          <div v-if="error" class="flex items-center gap-2 p-3 rounded-xl text-sm"
-               style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            {{ error }}
-          </div>
+          <!-- Erreur -->
+          <transition name="shake">
+            <div v-if="error" class="flex items-start gap-2 p-3 rounded-xl text-sm"
+                 style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA">
+              <svg class="flex-shrink-0 mt-0.5" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              {{ error }}
+            </div>
+          </transition>
 
-          <!-- Submit -->
-          <button type="submit" :disabled="loading" class="btn-primary w-full flex items-center justify-center gap-2 mt-2"
-                  style="font-family:Montserrat,sans-serif;padding:12px;font-size:14px">
-            <svg v-if="loading" class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <button type="submit" :disabled="loading"
+            class="w-full flex items-center justify-center gap-2 rounded-xl font-bold transition-all"
+            style="background:#FFCC00;color:#1C1B18;height:50px;font-family:Montserrat,sans-serif;font-size:15px"
+            :style="loading ? 'opacity:.7' : ''"
+            onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 8px 20px rgba(255,204,0,.35)'"
+            onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <svg v-if="loading" class="animate-spin" width="17" height="17" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,.2)" stroke-width="3"/>
-              <path d="M12 2a10 10 0 0110 10" stroke="#1A1D23" stroke-width="3" stroke-linecap="round"/>
+              <path d="M12 2a10 10 0 0110 10" stroke="#1C1B18" stroke-width="3" stroke-linecap="round"/>
             </svg>
-            {{ loading ? 'Connexion en cours…' : 'Se connecter' }}
+            {{ loading ? 'Connexion…' : 'Se connecter' }}
           </button>
         </form>
 
-        <p class="text-xs mt-6 text-center" style="color:#9C998F">
-          Pas de compte ? Contactez votre administrateur.
-        </p>
+        <div class="mt-7 pt-5" style="border-top:1px solid #F0EEE7">
+          <div class="flex items-center justify-center gap-2 text-xs" style="color:#9C998F">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="4" y="11" width="16" height="10" rx="2" stroke="#21A05A" stroke-width="2"/><path d="M8 11V7a4 4 0 018 0v4" stroke="#21A05A" stroke-width="2" stroke-linecap="round"/></svg>
+            Connexion sécurisée · plateforme interne MTN
+          </div>
+          <p class="text-xs mt-2 text-center" style="color:#B8B5AC">
+            Pas de compte ? Contactez votre administrateur.
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -139,7 +159,7 @@ const loading = ref(false)
 const error = ref('')
 const showPwd = ref(false)
 
-const features = ['VOC EBU', 'FTTH', '4G', 'Roaming', 'SurveyMonkey', 'Jointure auto']
+const features = ['VOC EBU', 'FTTH', '4G', 'Roaming', 'Jointure auto', 'Analyse NPS']
 
 async function handleLogin() {
   loading.value = true
@@ -154,3 +174,10 @@ async function handleLogin() {
   }
 }
 </script>
+
+<style scoped>
+.fade-up { animation: fadeUp .5s cubic-bezier(.21,1.02,.73,1) both; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+.shake-enter-active { animation: shake .4s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+</style>

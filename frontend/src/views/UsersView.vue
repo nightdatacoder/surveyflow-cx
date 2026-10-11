@@ -1,63 +1,77 @@
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between">
-      <h2 class="font-semibold text-gray-700">Gestion des utilisateurs</h2>
-      <button @click="showCreate = true" class="px-4 py-2 rounded-lg text-sm font-semibold" style="background:#23221E;color:#F5F4EF">
-        <i class="pi pi-plus mr-1"></i>Nouvel utilisateur
+    <div class="flex items-center justify-between gap-3">
+      <h2 class="font-bold text-lg" style="color:#21201C;font-family:Montserrat,sans-serif">Gestion des utilisateurs</h2>
+      <button @click="showCreate = true" class="px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 whitespace-nowrap flex-shrink-0" style="background:#23221E;color:#F5F4EF">
+        <i class="pi pi-plus"></i><span class="hidden sm:inline">Nouvel utilisateur</span><span class="sm:hidden">Nouveau</span>
       </button>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-      <table class="w-full text-sm">
-        <thead class="bg-gray-50">
-          <tr class="text-left text-xs text-gray-500">
-            <th class="px-4 py-3 font-semibold">Utilisateur</th>
-            <th class="px-4 py-3 font-semibold">Identifiant</th>
-            <th class="px-4 py-3 font-semibold">Rôle</th>
-            <th class="px-4 py-3 font-semibold">Département</th>
-            <th class="px-4 py-3 font-semibold">Statut</th>
-            <th class="px-4 py-3 font-semibold">Créé le</th>
-            <th class="px-4 py-3"></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-50">
-          <tr v-for="u in users" :key="u.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                     style="background:#FFCC00;color:#23221E">
-                  {{ initials(u) }}
-                </div>
-                <span class="font-medium text-gray-700">{{ u.full_name || u.username }}</span>
-              </div>
-            </td>
-            <td class="px-4 py-3 text-gray-500">{{ u.username }}</td>
-            <td class="px-4 py-3">
-              <span class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                    :style="roleStyle(u.role)">{{ roleLabel(u.role) }}</span>
-            </td>
-            <td class="px-4 py-3 text-gray-500">{{ u.department || '—' }}</td>
-            <td class="px-4 py-3">
-              <span :class="`px-2 py-0.5 rounded-full text-xs ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`">
-                {{ u.is_active ? 'Actif' : 'Inactif' }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-xs text-gray-400">{{ formatDate(u.created_at) }}</td>
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3 justify-end">
-                <button @click="openReset(u)" class="text-xs text-gray-400 hover:text-gray-700" title="Définir un nouveau mot de passe">
-                  <i class="pi pi-key mr-1" style="font-size:10px"></i>Mot de passe
-                </button>
-                <button v-if="u.id !== auth.user?.id" @click="toggleActive(u)" class="text-xs text-gray-400 hover:text-gray-600">
-                  {{ u.is_active ? 'Désactiver' : 'Activer' }}
-                </button>
-                <span v-else class="text-xs" style="color:#D5D2C8">Vous</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Loader -->
+    <div v-if="loading" class="bg-white rounded-xl p-12 flex justify-center" style="border:1px solid var(--border)">
+      <Spinner label="Chargement des utilisateurs…" />
     </div>
+
+    <template v-else>
+      <!-- Tableau (desktop) -->
+      <div class="bg-white rounded-xl overflow-hidden hidden md:block" style="border:1px solid var(--border)">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr class="text-left text-xs text-gray-500">
+              <th class="px-4 py-3 font-semibold">Utilisateur</th>
+              <th class="px-4 py-3 font-semibold">Identifiant</th>
+              <th class="px-4 py-3 font-semibold">Rôle</th>
+              <th class="px-4 py-3 font-semibold">Statut</th>
+              <th class="px-4 py-3 font-semibold">Créé le</th>
+              <th class="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            <tr v-for="u in users" :key="u.id" class="hover:bg-gray-50">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style="background:#FFCC00;color:#23221E">{{ initials(u) }}</div>
+                  <span class="font-medium text-gray-700 whitespace-nowrap">{{ u.full_name || u.username }}</span>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-gray-500">{{ u.username }}</td>
+              <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap" :style="roleStyle(u.role)">{{ roleLabel(u.role) }}</span></td>
+              <td class="px-4 py-3"><span :class="`px-2 py-0.5 rounded-full text-xs whitespace-nowrap ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`">{{ u.is_active ? 'Actif' : 'Inactif' }}</span></td>
+              <td class="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{{ formatDate(u.created_at) }}</td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3 justify-end">
+                  <button @click="openReset(u)" class="text-xs text-gray-400 hover:text-gray-700 whitespace-nowrap" title="Définir un nouveau mot de passe"><i class="pi pi-key mr-1" style="font-size:10px"></i>Mot de passe</button>
+                  <button v-if="u.id !== auth.user?.id" @click="toggleActive(u)" class="text-xs text-gray-400 hover:text-gray-600 whitespace-nowrap">{{ u.is_active ? 'Désactiver' : 'Activer' }}</button>
+                  <span v-else class="text-xs" style="color:#D5D2C8">Vous</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cartes (mobile) -->
+      <div class="md:hidden space-y-3">
+        <div v-for="u in users" :key="u.id" class="bg-white rounded-xl p-4" style="border:1px solid var(--border)">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style="background:#FFCC00;color:#23221E">{{ initials(u) }}</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-sm text-gray-800 truncate">{{ u.full_name || u.username }}</p>
+              <p class="text-xs" style="color:#9C998F">{{ u.username }}</p>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0" :style="roleStyle(u.role)">{{ roleLabel(u.role) }}</span>
+          </div>
+          <div class="flex items-center justify-between pt-3" style="border-top:1px solid #F0EEE7">
+            <span :class="`px-2 py-0.5 rounded-full text-xs ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`">{{ u.is_active ? 'Actif' : 'Inactif' }}</span>
+            <div class="flex items-center gap-4">
+              <button @click="openReset(u)" class="text-xs text-gray-500"><i class="pi pi-key mr-1" style="font-size:10px"></i>Mot de passe</button>
+              <button v-if="u.id !== auth.user?.id" @click="toggleActive(u)" class="text-xs" :style="u.is_active ? 'color:#D4452C' : 'color:#21A05A'">{{ u.is_active ? 'Désactiver' : 'Activer' }}</button>
+              <span v-else class="text-xs" style="color:#D5D2C8">Vous</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
 
     <!-- Reset password modal -->
     <div v-if="resetTarget" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -117,10 +131,12 @@ import { ref, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import api from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
+import Spinner from '@/components/Spinner.vue'
 
 const auth = useAuthStore()
 const toast = useToast()
 const users = ref([])
+const loading = ref(true)
 const showCreate = ref(false)
 const newUser = ref({ first_name: '', last_name: '', username: '', email: '', password: '', role: 'AGENT', department: '' })
 const resetTarget = ref(null)
@@ -184,8 +200,11 @@ async function createUser() {
 }
 
 onMounted(async () => {
-  const { data } = await api.get('/auth/users/').catch(() => ({ data: [] }))
-  users.value = data.results || data
+  try {
+    const { data } = await api.get('/auth/users/')
+    users.value = data.results || data
+  } catch { users.value = [] }
+  finally { loading.value = false }
 })
 </script>
 

@@ -172,9 +172,9 @@
 
         <!-- Match rate bar -->
         <div class="mb-5">
-          <div class="flex justify-between text-xs mb-1" style="color:var(--text-secondary)">
-            <span>Taux de correspondance ({{ joinConfig.left_key }} ↔ {{ joinConfig.right_key }})</span>
-            <span class="font-semibold" style="color:var(--text-primary)">{{ joinResult.match_rate }}%</span>
+          <div class="flex justify-between items-center gap-2 text-xs mb-1" style="color:var(--text-secondary)">
+            <span class="truncate">Taux de correspondance ({{ joinConfig.left_key }} ↔ {{ joinConfig.right_key }})</span>
+            <span class="font-semibold flex-shrink-0" style="color:var(--text-primary)">{{ joinResult.match_rate }}%</span>
           </div>
           <div class="h-2 rounded-full" style="background:#EFEDE6">
             <div class="h-2 rounded-full transition-all"
@@ -226,7 +226,7 @@
         </div>
 
         <!-- Export buttons -->
-        <div class="flex gap-3 mt-5 pt-5 border-t">
+        <div class="flex flex-wrap gap-2 mt-5 pt-5 border-t">
           <ExportButton :file-id="fileId" mode="joined" format="xlsx" label="Exporter XLSX enrichi" primary />
           <ExportButton :file-id="fileId" mode="joined" format="csv" label="Exporter CSV" />
           <ExportButton :file-id="fileId" mode="cleaned" format="xlsx" label="Exporter nettoyé seulement" />

@@ -100,7 +100,7 @@
 
       <div class="divide-y divide-gray-50">
         <div v-for="col in visibleColumns" :key="col.index"
-          class="flex items-center gap-4 px-5 py-3 col-row"
+          class="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 col-row flex-wrap sm:flex-nowrap"
           :class="{
             'opacity-40': dropped.has(col.original_name),
             'is-dragging': dragIndex === col.index,
@@ -139,15 +139,15 @@
             </p>
           </div>
 
-          <!-- Arrow -->
-          <svg class="flex-shrink-0" style="color:#D5D2C8" width="16" height="16" viewBox="0 0 24 24" fill="none"><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="12 5 19 12 12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <!-- Arrow (desktop) -->
+          <svg class="flex-shrink-0 hidden sm:block" style="color:#D5D2C8" width="16" height="16" viewBox="0 0 24 24" fill="none"><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="12 5 19 12 12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 
           <!-- Target name input -->
           <input
             v-model="mapping[col.original_name]"
             :disabled="dropped.has(col.original_name)"
             :placeholder="col.original_name"
-            class="w-56 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+            class="w-full sm:w-56 px-3 py-2 rounded-lg text-sm font-medium transition-all"
             :style="col.is_join_key
               ? 'border:1.5px solid #23221E;background:#FAF9F5;font-family:Montserrat,sans-serif;outline:none'
               : 'border:1px solid var(--border);font-family:Montserrat,sans-serif;outline:none'" />
