@@ -14,8 +14,17 @@ class AgentDashboardView(APIView):
     def get(self, request):
         user = request.user
         is_supervisor = user.role in ('ADMIN', 'MANAGER')
-        files = ImportedFile.objects.all() if is_supervisor else ImportedFile.objects.filter(user=user)
-        reports = ProcessingReport.objects.all() if is_supervisor else ProcessingReport.objects.filter(user=user)
+        base_files = ImportedFile.objects.all() if is_supervisor else ImportedFile.objects.filter(user=user)
+        base_reports = ProcessingReport.objects.all() if is_supervisor else ProcessingReport.objects.filter(user=user)
+
+        # Filtre optionnel par type d'enquête
+        survey_type = request.query_params.get('survey_type') or ''
+        files = base_files.filter(survey_type=survey_type) if survey_type else base_files
+        reports = base_reports.filter(survey_type=survey_type) if survey_type else base_reports
+
+        available_types = sorted(set(
+            base_files.exclude(survey_type='').values_list('survey_type', flat=True)
+        ))
 
         recent = files.order_by('-created_at')[:6]
 
@@ -44,6 +53,9 @@ class AgentDashboardView(APIView):
             files_trend = (100 if this_month > 0 else 0)
 
         return Response({
+            'scope': survey_type or 'all',
+            'is_supervisor': is_supervisor,
+            'available_types': available_types,
             'total_reports': files.count(),
             'total_rows': files.aggregate(t=Sum('total_rows'))['t'] or 0,
             'joined_count': files.filter(status='JOINED').count(),

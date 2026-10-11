@@ -47,11 +47,25 @@
     </div>
 
     <template v-else>
+      <!-- Filtre par enquête -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold whitespace-nowrap" style="color:#6E6B63">Afficher :</span>
+          <select v-model="selectedType" @change="loadCore"
+            class="flex-1 sm:flex-none px-3 py-2 rounded-lg text-sm bg-white" style="border:1px solid var(--border)">
+            <option value="">Toutes les enquêtes</option>
+            <option v-for="t in availableTypes" :key="t" :value="t">{{ t }}</option>
+          </select>
+          <i v-if="reloading" class="pi pi-spin pi-spinner text-xs" style="color:#9C998F"></i>
+        </div>
+        <span class="text-xs" style="color:#9C998F">{{ scopeLabel }}</span>
+      </div>
+
       <!-- Cartes métriques -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
-        <MetricCard label="Total d'enquêtes" :value="formatNum(stats.total_reports)" icon="pi-users"
+        <MetricCard label="Enquêtes traitées" :value="formatNum(stats.total_reports)" icon="pi-inbox"
           tone="yellow" :trend="stats.files_trend" :spark="activitySpark" type="bar" />
-        <MetricCard label="NPS global" :value="stats.nps_global != null ? (stats.nps_global>0?'+':'')+stats.nps_global : '—'" icon="pi-star"
+        <MetricCard label="Score NPS" :value="stats.nps_global != null ? (stats.nps_global>0?'+':'')+stats.nps_global : '—'" icon="pi-star"
           tone="green" :trend="npsTrend" suffix=" pts" :spark="npsSpark" type="line" />
         <MetricCard label="Satisfaction client" :value="stats.satisfaction_pct != null ? stats.satisfaction_pct+'%' : '—'" icon="pi-face-smile"
           tone="yellow" :spark="npsSpark" type="line" />
@@ -171,10 +185,20 @@ import Spinner from '@/components/Spinner.vue'
 
 const auth = useAuthStore()
 const loading = ref(true)
+const reloading = ref(false)
 const stats = ref({})
 const npsSummary = ref([])
 const npsSeries = ref({})
 const dailyCounts = ref([])
+const selectedType = ref('')
+const availableTypes = computed(() => stats.value.available_types || [])
+
+const scopeLabel = computed(() => {
+  const who = stats.value.is_supervisor ? ' · toute l\'équipe' : ''
+  return selectedType.value
+    ? `Chiffres de l'enquête « ${selectedType.value} »${who}`
+    : `Toutes vos enquêtes confondues${who}`
+})
 
 const periodLabel = computed(() => {
   const d = new Date()
@@ -207,10 +231,13 @@ function arc(v) { return sent.value.total ? (v / sent.value.total) * C : 0 }
 
 // Sparkline enquêtes = activité 14 jours
 const activitySpark = computed(() => dailyCounts.value.length ? dailyCounts.value : [])
-// Série NPS à plat (tous types, triée par date)
+// Série NPS pour la courbe : filtrée si une enquête est choisie, sinon toutes
 const npsLine = computed(() => {
+  const src = selectedType.value
+    ? { [selectedType.value]: npsSeries.value[selectedType.value] || [] }
+    : npsSeries.value
   const pts = []
-  Object.values(npsSeries.value).forEach(arr => arr.forEach(p => pts.push({ date: new Date(p.date), nps: p.nps })))
+  Object.values(src).forEach(arr => (arr || []).forEach(p => pts.push({ date: new Date(p.date), nps: p.nps })))
   pts.sort((a, b) => a.date - b.date)
   return pts.map(p => ({ nps: p.nps, label: p.date.toLocaleDateString('fr-FR', { month: 'short' }) }))
 })
@@ -242,6 +269,14 @@ const areaPath = computed(() => npsPts.value.length < 2 ? '' : `${linePath.value
 function npsColor(n) { return n >= 50 ? '#21A05A' : n >= 0 ? '#B7791F' : '#D4452C' }
 function formatNum(n) { return (n || 0).toLocaleString('fr-FR') }
 function formatDate(d) { return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }) }
+
+async function loadCore() {
+  reloading.value = true
+  try {
+    const { data } = await api.get('/dashboard/agent/', { params: selectedType.value ? { survey_type: selectedType.value } : {} })
+    stats.value = data
+  } finally { reloading.value = false }
+}
 
 onMounted(async () => {
   try {
