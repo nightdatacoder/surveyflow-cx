@@ -60,6 +60,10 @@
         </div>
         <span class="text-xs" style="color:#9C998F">{{ scopeLabel }}</span>
       </div>
+      <p class="text-xs mb-4 -mt-2" style="color:#B8B5AC">
+        <i class="pi pi-info-circle" style="font-size:10px"></i>
+        Les 4 cartes sont des totaux cumulés. La courbe « Évolution du NPS » montre, elle, le détail mois par mois.
+      </p>
 
       <!-- Cartes métriques -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
@@ -82,21 +86,27 @@
             <p class="text-xs mt-0.5" style="color:#9C998F">Score NPS moyen, mois par mois — pour suivre la tendance de satisfaction</p>
           </div>
           <div v-if="npsLine.length > 1">
-            <svg :viewBox="`0 0 ${W} ${H}`" class="w-full" :style="`height:${H}px`" preserveAspectRatio="none">
+            <svg :viewBox="`0 0 ${W} ${H}`" class="w-full" style="height:auto">
               <defs>
                 <linearGradient id="npsFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="#FFCC00" stop-opacity="0.28"/>
                   <stop offset="100%" stop-color="#FFCC00" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <line v-for="(g,i) in 5" :key="i" :x1="PADL" :x2="W-PADR" :y1="yAt(i*25)" :y2="yAt(i*25)" stroke="#F0EEE7" stroke-width="1"/>
+              <!-- Graduations Y (échelle NPS) -->
+              <g v-for="tk in gridTicks" :key="tk">
+                <line :x1="PADL" :x2="W-PADR" :y1="yAt(tk)" :y2="yAt(tk)" stroke="#F0EEE7" stroke-width="1"/>
+                <text :x="PADL-8" :y="yAt(tk)+4" text-anchor="end" style="font-size:11px;fill:#B8B5AC">{{ tk>0?'+':'' }}{{ tk }}</text>
+              </g>
               <path :d="areaPath" fill="url(#npsFill)"/>
               <path :d="linePath" fill="none" stroke="#E9A800" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle v-for="(p,i) in npsPts" :key="i" :cx="p.x" :cy="p.y" r="3.5" fill="#FFCC00" stroke="#fff" stroke-width="2"/>
+              <!-- Points + valeur -->
+              <g v-for="(p,i) in npsPts" :key="i">
+                <circle :cx="p.x" :cy="p.y" r="4" fill="#FFCC00" stroke="#fff" stroke-width="2"/>
+                <text :x="p.x" :y="p.y-11" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#21201C;font-family:Montserrat">{{ p.nps>0?'+':'' }}{{ p.nps }}</text>
+                <text :x="p.x" :y="H-6" text-anchor="middle" style="font-size:11px;fill:#9C998F">{{ npsLine[i].label }}</text>
+              </g>
             </svg>
-            <div class="flex justify-between mt-1 px-1">
-              <span v-for="(p,i) in npsLine" :key="i" class="text-xs" style="color:#9C998F">{{ p.label }}</span>
-            </div>
           </div>
           <div v-else class="py-14 text-center text-sm" style="color:#9C998F">
             <i class="pi pi-chart-line text-2xl block mb-2"></i>
@@ -128,7 +138,8 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <!-- Répartition des sentiments -->
         <div class="bg-white rounded-2xl p-5" style="border:1px solid var(--border)">
-          <h2 class="font-bold text-sm mb-4" style="color:#21201C;font-family:Montserrat,sans-serif">Répartition des sentiments</h2>
+          <h2 class="font-bold text-sm" style="color:#21201C;font-family:Montserrat,sans-serif">Répartition des sentiments</h2>
+          <p class="text-xs mb-4 mt-0.5" style="color:#9C998F">Sur l'ensemble des réponses du périmètre affiché</p>
           <div v-if="sent.total > 0" class="flex items-center gap-6">
             <svg width="150" height="150" viewBox="0 0 140 140" class="flex-shrink-0">
               <circle cx="70" cy="70" :r="R" fill="none" stroke="#F0EEE7" stroke-width="18"/>
@@ -258,14 +269,21 @@ const npsLine = computed(() => {
 const npsSpark = computed(() => npsLine.value.map(p => p.nps + 100))
 const npsTrend = computed(() => npsLine.value.length > 1 ? Math.round(npsLine.value[npsLine.value.length-1].nps - npsLine.value[0].nps) : null)
 
-// Courbe NPS (échelle -100..100 affichée 0..100 via (nps+100)/2)
-const W = 560, H = 190, PADL = 8, PADR = 8, PADT = 10, PADB = 10
-function yAt(pct) { return PADT + (1 - pct/100) * (H - PADT - PADB) }
+// Courbe NPS : échelle réelle graduée (0..100 si tout positif, sinon -100..100)
+const W = 720, H = 240, PADL = 38, PADR = 16, PADT = 26, PADB = 28
+const chartMin = computed(() => npsLine.value.some(p => p.nps < 0) ? -100 : 0)
+const chartMax = 100
+function yAt(val) { return PADT + (1 - (val - chartMin.value) / (chartMax - chartMin.value)) * (H - PADT - PADB) }
+const gridTicks = computed(() => {
+  const min = chartMin.value, n = 4
+  return Array.from({ length: n + 1 }, (_, i) => Math.round(min + (chartMax - min) * i / n))
+})
 const npsPts = computed(() => {
   const n = npsLine.value.length
   return npsLine.value.map((p, i) => ({
-    x: PADL + (n === 1 ? 0.5 : i/(n-1)) * (W - PADL - PADR),
-    y: yAt((p.nps + 100) / 2),
+    x: PADL + (n === 1 ? 0.5 : i / (n - 1)) * (W - PADL - PADR),
+    y: yAt(p.nps),
+    nps: p.nps,
   }))
 })
 const linePath = computed(() => {
@@ -278,7 +296,7 @@ const linePath = computed(() => {
   }
   return d
 })
-const areaPath = computed(() => npsPts.value.length < 2 ? '' : `${linePath.value} L${W-PADR},${H-PADB} L${PADL},${H-PADB} Z`)
+const areaPath = computed(() => npsPts.value.length < 2 ? '' : `${linePath.value} L${W-PADR},${yAt(chartMin.value)} L${PADL},${yAt(chartMin.value)} Z`)
 
 function npsColor(n) { return n >= 50 ? '#21A05A' : n >= 0 ? '#B7791F' : '#D4452C' }
 function formatNum(n) { return (n || 0).toLocaleString('fr-FR') }
