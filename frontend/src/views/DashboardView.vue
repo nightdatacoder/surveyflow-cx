@@ -60,10 +60,6 @@
         </div>
         <span class="text-xs" style="color:#9C998F">{{ scopeLabel }}</span>
       </div>
-      <p class="text-xs mb-4 -mt-2" style="color:#B8B5AC">
-        <i class="pi pi-info-circle" style="font-size:10px"></i>
-        Les 4 cartes sont des totaux cumulés. La courbe « Évolution du NPS » montre, elle, le détail mois par mois.
-      </p>
 
       <!-- Cartes métriques -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
