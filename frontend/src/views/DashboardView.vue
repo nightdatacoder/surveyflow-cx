@@ -77,7 +77,10 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
         <!-- Évolution du NPS -->
         <div class="lg:col-span-2 bg-white rounded-2xl p-5" style="border:1px solid var(--border)">
-          <h2 class="font-bold text-sm mb-4" style="color:#21201C;font-family:Montserrat,sans-serif">Évolution du NPS</h2>
+          <div class="mb-4">
+            <h2 class="font-bold text-sm" style="color:#21201C;font-family:Montserrat,sans-serif">Évolution du NPS</h2>
+            <p class="text-xs mt-0.5" style="color:#9C998F">Score NPS moyen, mois par mois — pour suivre la tendance de satisfaction</p>
+          </div>
           <div v-if="npsLine.length > 1">
             <svg :viewBox="`0 0 ${W} ${H}`" class="w-full" :style="`height:${H}px`" preserveAspectRatio="none">
               <defs>
@@ -231,15 +234,26 @@ function arc(v) { return sent.value.total ? (v / sent.value.total) * C : 0 }
 
 // Sparkline enquêtes = activité 14 jours
 const activitySpark = computed(() => dailyCounts.value.length ? dailyCounts.value : [])
-// Série NPS pour la courbe : filtrée si une enquête est choisie, sinon toutes
+// Courbe NPS = NPS MOYEN PAR MOIS (filtrée si une enquête est choisie)
 const npsLine = computed(() => {
   const src = selectedType.value
     ? { [selectedType.value]: npsSeries.value[selectedType.value] || [] }
     : npsSeries.value
-  const pts = []
-  Object.values(src).forEach(arr => (arr || []).forEach(p => pts.push({ date: new Date(p.date), nps: p.nps })))
-  pts.sort((a, b) => a.date - b.date)
-  return pts.map(p => ({ nps: p.nps, label: p.date.toLocaleDateString('fr-FR', { month: 'short' }) }))
+  const byMonth = {}
+  Object.values(src).forEach(arr => (arr || []).forEach(p => {
+    const d = new Date(p.date)
+    const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`
+    if (!byMonth[key]) byMonth[key] = { sum: 0, count: 0, date: new Date(d.getFullYear(), d.getMonth(), 1) }
+    byMonth[key].sum += p.nps
+    byMonth[key].count++
+  })
+  )
+  const months = Object.values(byMonth).sort((a, b) => a.date - b.date)
+  const multiYear = new Set(months.map(m => m.date.getFullYear())).size > 1
+  return months.map(m => ({
+    nps: Math.round(m.sum / m.count * 10) / 10,
+    label: m.date.toLocaleDateString('fr-FR', multiYear ? { month: 'short', year: '2-digit' } : { month: 'short' }),
+  }))
 })
 const npsSpark = computed(() => npsLine.value.map(p => p.nps + 100))
 const npsTrend = computed(() => npsLine.value.length > 1 ? Math.round(npsLine.value[npsLine.value.length-1].nps - npsLine.value[0].nps) : null)
