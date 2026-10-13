@@ -79,7 +79,7 @@
         <div class="lg:col-span-2 bg-white rounded-2xl p-5" style="border:1px solid var(--border)">
           <div class="mb-4">
             <h2 class="font-bold text-sm" style="color:#21201C;font-family:Montserrat,sans-serif">Évolution du NPS</h2>
-            <p class="text-xs mt-0.5" style="color:#9C998F">Score NPS moyen, mois par mois — pour suivre la tendance de satisfaction</p>
+            <p class="text-xs mt-0.5" style="color:#9C998F">{{ npsMode === 'month' ? 'Score NPS moyen, mois par mois — pour suivre la tendance de satisfaction' : 'Score NPS par fichier traité, dans l\'ordre chronologique' }}</p>
           </div>
           <div v-if="npsLine.length > 1">
             <svg :viewBox="`0 0 ${W} ${H}`" class="w-full" style="height:auto">
@@ -106,7 +106,7 @@
           </div>
           <div v-else class="py-14 text-center text-sm" style="color:#9C998F">
             <i class="pi pi-chart-line text-2xl block mb-2"></i>
-            Pas encore assez de données. Traitez au moins deux fichiers pour voir la tendance.
+            Pas encore assez de données. Traitez au moins deux enquêtes avec un score NPS pour voir la courbe.
           </div>
         </div>
 
@@ -241,25 +241,46 @@ function arc(v) { return sent.value.total ? (v / sent.value.total) * C : 0 }
 
 // Sparkline enquêtes = activité 14 jours
 const activitySpark = computed(() => dailyCounts.value.length ? dailyCounts.value : [])
-// Courbe NPS = NPS MOYEN PAR MOIS (filtrée si une enquête est choisie)
-const npsLine = computed(() => {
+// Points NPS bruts (par rapport), filtrés si une enquête est choisie
+const npsRaw = computed(() => {
   const src = selectedType.value
     ? { [selectedType.value]: npsSeries.value[selectedType.value] || [] }
     : npsSeries.value
-  const byMonth = {}
-  Object.values(src).forEach(arr => (arr || []).forEach(p => {
-    const d = new Date(p.date)
-    const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`
-    if (!byMonth[key]) byMonth[key] = { sum: 0, count: 0, date: new Date(d.getFullYear(), d.getMonth(), 1) }
-    byMonth[key].sum += p.nps
-    byMonth[key].count++
-  })
-  )
-  const months = Object.values(byMonth).sort((a, b) => a.date - b.date)
-  const multiYear = new Set(months.map(m => m.date.getFullYear())).size > 1
-  return months.map(m => ({
-    nps: Math.round(m.sum / m.count * 10) / 10,
-    label: m.date.toLocaleDateString('fr-FR', multiYear ? { month: 'short', year: '2-digit' } : { month: 'short' }),
+  const pts = []
+  Object.values(src).forEach(arr => (arr || []).forEach(p => pts.push({ date: new Date(p.date), nps: p.nps })))
+  return pts.sort((a, b) => a.date - b.date)
+})
+// Nb de mois distincts couverts par les données
+const npsMonths = computed(() => {
+  const s = new Set()
+  npsRaw.value.forEach(p => s.add(`${p.date.getFullYear()}-${p.date.getMonth()}`))
+  return s.size
+})
+// Mode d'affichage : 'month' dès qu'on a ≥2 mois, sinon 'file' (un point par fichier traité)
+const npsMode = computed(() => (npsMonths.value > 1 ? 'month' : 'file'))
+// Courbe NPS = NPS moyen PAR MOIS si ≥2 mois, sinon un point PAR FICHIER traité
+const npsLine = computed(() => {
+  const pts = npsRaw.value
+  if (!pts.length) return []
+  if (npsMode.value === 'month') {
+    const byMonth = {}
+    pts.forEach(p => {
+      const key = `${p.date.getFullYear()}-${String(p.date.getMonth()).padStart(2, '0')}`
+      if (!byMonth[key]) byMonth[key] = { sum: 0, count: 0, date: new Date(p.date.getFullYear(), p.date.getMonth(), 1) }
+      byMonth[key].sum += p.nps
+      byMonth[key].count++
+    })
+    const months = Object.values(byMonth).sort((a, b) => a.date - b.date)
+    const multiYear = new Set(months.map(m => m.date.getFullYear())).size > 1
+    return months.map(m => ({
+      nps: Math.round(m.sum / m.count * 10) / 10,
+      label: m.date.toLocaleDateString('fr-FR', multiYear ? { month: 'short', year: '2-digit' } : { month: 'short' }),
+    }))
+  }
+  // Fallback : un point par fichier traité (chronologique)
+  return pts.map(p => ({
+    nps: Math.round(p.nps * 10) / 10,
+    label: p.date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
   }))
 })
 const npsSpark = computed(() => npsLine.value.map(p => p.nps + 100))
